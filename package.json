@@ -1,0 +1,16 @@
+{
+  "name": "loopback-data-juggler-standalone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash.find": "^4.6.0",
+    "loopback-connector-postgresql": "^3.5.0",
+    "loopback-datasource-juggler": "^4.4.0"
+  }
+}
