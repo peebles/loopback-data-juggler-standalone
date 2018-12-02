@@ -13,7 +13,7 @@ const _find = require( 'lodash.find' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-module.exports = function(connector, modelsPath) {
+module.exports = function(connector, modelsPath, relations) {
 
   function haveModels() {
     // Create the schemas array by reading all of the .json files in the given path
@@ -77,6 +77,13 @@ module.exports = function(connector, modelsPath) {
       });
       return Promise.all(promises).then(() => {
         return dbmodels;
+      }).then((models) => {
+        if ( ! relations ) return models;
+        Object.keys( models ).forEach((modelName) => {
+          let model = _find( relations, { name: modelName } ) || {};
+          dataSource.defineRelations( models[modelName], model.relations || {} );
+        });
+        return models;
       });
     });
   }
