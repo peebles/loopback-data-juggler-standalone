@@ -1,0 +1,43 @@
+{
+  "name": "config",
+  "base": "PersistedModel",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "deviceId": {
+      "type": "string",
+      "id": true,
+      "index": true,
+      "defaultFn": "shortid"
+    },
+    "deviceType": {
+      "type": "string",
+      "required": true
+    },
+    "activationCode": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object",
+      "required": true,
+      "default": {}
+    }
+  },
+  "validations": [],
+  "relations": {
+    "gadget": {
+      "type": "belongsTo",
+      "model": "gadget",
+      "foreignKey": "gadgetId"
+    },
+    "state": {
+      "type": "hasOne",
+      "model": "state",
+      "foreignKey": "deviceId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

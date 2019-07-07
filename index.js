@@ -15,6 +15,20 @@ const path = require( 'path' );
 
 module.exports = function(connector, modelsPath, relations) {
 
+  const dbSync = (models) => {
+    const dataSource = models[Object.keys(models)[0]].getDataSource();
+    return new Promise((resolve, reject) => {
+      dataSource.isActual((err, actual) => {
+        if (err) return reject(err);
+        if (actual) return resolve('datasource is up to date');
+        dataSource.autoupdate((err) => {
+          if (err) return reject(err);
+          return resolve('datasource updated');
+        });
+      });
+    });
+  }
+
   function haveModels() {
     // Create the schemas array by reading all of the .json files in the given path
     function loadSchemas( dirPath ) {
@@ -56,7 +70,15 @@ module.exports = function(connector, modelsPath, relations) {
     return models;
   }
 
-  if ( modelsPath ) return haveModels();
+  if ( modelsPath && connector.sync !== undefined && connector.sync === true ) {
+    let models = haveModels();
+    let keys = Object.keys(models);
+    if ( ! keys.length ) return Promise.reject(new Error('There are no model definitions to sync!'));
+    return dbSync(models).then((status) => {
+      return {status, models};
+    });
+  }
+  else if ( modelsPath ) return haveModels();
   else {
     // discovery mode
     const dataSource = new DataSource( connector.name, connector );

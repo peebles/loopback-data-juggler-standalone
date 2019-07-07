@@ -99,3 +99,34 @@ db( connector, null, relations ).then((models) => {
 ```
 
 See the Loopback documentation for how to describe relations.
+
+## Database Sync
+
+This module now supports database syncing ... schema creation and schema modifications based on the supplied models.  You just add a "sync: true"
+in the connector specification, and treat this module as a promise.
+
+```js
+const connector = {
+  sync: true,
+  name: "postgres",
+  connector: "postgresql",
+  host: "192.168.99.100",
+  port: 5432,
+  url: "",
+  database: "be",
+  password: "secret",
+  user: "admin",
+};
+const pathToModels = require('path').resolve('./models');
+const p = require('loopback-data-juggler-standalone');
+p(connector, pathToModels).then((res) => {
+  console.log( res.status );
+  const models = res.models;
+  Object.keys(models).forEach((modelName) => {
+    console.log( `=> ${modelName}` );
+  });
+  process.exit();
+}).catch((err) => {
+  console.log( 'Error:', err.message );
+});
+```
