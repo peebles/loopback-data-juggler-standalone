@@ -36,7 +36,8 @@ module.exports = function(connector, modelsPath, relations) {
       let files = fs.readdirSync( dirPath );
       files.forEach((f) => {
         if ( f.match(/\.json$/ ) ) {
-          schemas.push( require( path.join( dirPath, f ) ) );
+          let s = require( path.join( dirPath, f ) );
+          schemas.push( s );
         }
       });
       return schemas;
@@ -44,8 +45,10 @@ module.exports = function(connector, modelsPath, relations) {
 
     const modelBuilder = new ModelBuilder();
     let schemas;
-    if ( modelsPath instanceof Array )
+    if ( modelsPath instanceof Array ) {
       schemas = modelsPath;
+      modelsPath = relations;
+    }
     else
       schemas = loadSchemas( modelsPath );
     const models = modelBuilder.buildModels( schemas );
@@ -59,11 +62,15 @@ module.exports = function(connector, modelsPath, relations) {
       dataSource.defineRelations( models[modelName], _find( schemas, { name: modelName } ).relations || {} );
     });
     Object.keys( models ).forEach((modelName) => {
-      let filename = `${path.join(modelsPath,modelName)}.js`;
+      let mn = modelName;
+      console.log('modelName:', mn);
+      mn = mn.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`).replace(/^-/, ''); // from internal camelcase back to fs
+      let filename = `${path.join(modelsPath,mn)}.js`;
       if ( fs.existsSync(filename) ) {
         // have to noop stuff that does not exist outside of loopback
         models[modelName].remoteMethod = function(){};
-        require( path.join(modelsPath,modelName) )(models[modelName]);
+        models[modelName].beforeRemote = function(){};
+        require( path.join(modelsPath,mn) )(models[modelName]);
       }
     });
 

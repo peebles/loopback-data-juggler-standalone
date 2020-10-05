@@ -43,6 +43,8 @@ The `connector` specification is as described [here](https://loopback.io/doc/en/
 be a path in the file system to the models directory created in a loopback app, typically "common/models", or it can be an array of loopback model
 definitions as described [here](https://loopback.io/doc/en/lb3/Customizing-models.html).
 
+> *NOTE* If you employ custom base classes for your models, see Custom Base Classes below
+
 Discovery is also supported, and is triggered if you do not supply a second argument to this module.  In this case, an attempt is made to
 discover the models from just inspecting the database.  This is somewhat limited however in regards to relations.  It handles `belongsTo`
 relations so long as you explicity describe your foreign keys and what they point to when you design the database schema.  In addition, this module
@@ -130,3 +132,48 @@ p(connector, pathToModels).then((res) => {
   console.log( 'Error:', err.message );
 });
 ```
+
+## Custom Base Classes
+
+If you are using custom base classes in your model definitions and are using the `(connector, path-to-models)` form of the
+call, you have to so something a little different or things won't work.  You need to create your own array of model
+definitions, and call `(connector, array-of-schemas, path-to-models)`.
+
+When building your own array of model definitions, you must ensure your custom base classes come first in the array,
+before any classes that use them.  And you must specify the "base" classname in the "options" section of each model
+in addition to it being at the top of the model definition hierarchy.  Here is some reference code you can use for
+reading your "/common/models" directory and dealing with a custom base class named "MyBase":
+
+```js
+const lodash = require('lodash');
+
+function loadSchemas( dirPath ) {
+  let schemas = [];
+  let files = require('fs').readdirSync( dirPath );
+  files.forEach((f) => {
+    if ( f.match(/\.json$/ ) ) {
+      let s = require( require('path').join( dirPath, f ) );
+      // If it has a custom base, copy it to options
+      if ( s.base === "MyBase" ) {
+        if ( ! s.options ) s.options = {};
+        s.options.base = s.base;
+      }
+      schemas.push( s );
+    }
+  });
+
+  // Move "MyBase" model definition to the front of the schemas array
+  let myBase = _.find(schemas, {name: "MyBase"});
+  schemas = _.reject(schemas, {name: "MyBase"});
+  schemas.unshift(MyBase);
+
+  return schemas;
+}
+
+models = require('loopback-data-juggler-standalone')(
+  connector,
+  loadSchemas(require('path').resolve("./common/models")),
+  require('path').resolve("./common/models")
+);
+```
+
