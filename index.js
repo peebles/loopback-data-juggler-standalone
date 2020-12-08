@@ -63,7 +63,6 @@ module.exports = function(connector, modelsPath, relations) {
     });
     Object.keys( models ).forEach((modelName) => {
       let mn = modelName;
-      console.log('modelName:', mn);
       mn = mn.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`).replace(/^-/, ''); // from internal camelcase back to fs
       let filename = `${path.join(modelsPath,mn)}.js`;
       if ( fs.existsSync(filename) ) {
