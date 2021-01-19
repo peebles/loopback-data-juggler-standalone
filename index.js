@@ -62,16 +62,6 @@ module.exports = function(connector, modelsPath, relations) {
 
     const dataSource = makeDatasource( connector.name, connector );
 
-    dataSource.on("error", err => {
-      console.log( `Datasource Error: ${err.message}` );
-    });
-
-    ["connected", "initialized"].forEach(e => {
-      dataSource.on(e, () => {
-        console.log(`Datasource event "${e}"`);
-      });
-    });
-    
     Object.keys( models ).forEach((modelName) => {
       dataSource.attach( models[modelName] );
     });
