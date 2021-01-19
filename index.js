@@ -15,6 +15,13 @@ const path = require( 'path' );
 
 module.exports = function(connector, modelsPath, relations) {
 
+  const makeDatasource = (name, connector) => {
+    let ds = new DataSource(name, connector);
+    // This prevents uncaught exceptions and allows database to reconnect
+    ds.on("error", () => {});
+    return ds;
+  }
+
   const dbSync = (models) => {
     const dataSource = models[Object.keys(models)[0]].getDataSource();
     return new Promise((resolve, reject) => {
@@ -53,7 +60,17 @@ module.exports = function(connector, modelsPath, relations) {
       schemas = loadSchemas( modelsPath );
     const models = modelBuilder.buildModels( schemas );
 
-    const dataSource = new DataSource( connector.name, connector );
+    const dataSource = makeDatasource( connector.name, connector );
+
+    dataSource.on("error", err => {
+      console.log( `Datasource Error: ${err.message}` );
+    });
+
+    ["connected", "initialized"].forEach(e => {
+      dataSource.on(e, () => {
+        console.log(`Datasource event "${e}"`);
+      });
+    });
     
     Object.keys( models ).forEach((modelName) => {
       dataSource.attach( models[modelName] );
@@ -87,7 +104,7 @@ module.exports = function(connector, modelsPath, relations) {
   else if ( modelsPath ) return haveModels();
   else {
     // discovery mode
-    const dataSource = new DataSource( connector.name, connector );
+    const dataSource = makeDatasource( connector.name, connector );
     return Promise.resolve().then(() => {
       return dataSource.discoverModelDefinitions();
     }).then((tables) => {
