@@ -13,6 +13,13 @@ const _find = require( 'lodash.find' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
+// loopback-datasource-juggler uses strong-globalize and g.error() to print some
+// messages; specifically when there are temporary connection timeouts with MongoDB
+// which by default end up on the console.  They are emitted as well, and we already
+// attach a listener and print warnings via app.log ... so lets disable the SG messages
+const SG = require('strong-globalize');
+SG.SetPersistentLogging(()=>{}, true /* disable console.log */); 
+
 module.exports = function(connector, modelsPath, relations) {
 
   const makeDatasource = (name, connector) => {
