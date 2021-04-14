@@ -83,6 +83,7 @@ module.exports = function(connector, modelsPath, relations) {
         // have to noop stuff that does not exist outside of loopback
         models[modelName].remoteMethod = function(){};
         models[modelName].beforeRemote = function(){};
+        models[modelName].afterRemote = function(){};
         require( path.join(modelsPath,mn) )(models[modelName]);
       }
     });
