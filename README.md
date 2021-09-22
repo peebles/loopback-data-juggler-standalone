@@ -1,5 +1,8 @@
 # Use Loopback/StrongLoop Database Connector Standalone
 
+**THIS MODULE IS DEPRICATED** Please use https://github.com/peebles/loopback-orm instead.  Does the same thing, but has
+a cleaner interface and supports mixins.
+
 [Loopback](https://loopback.io/doc/en/lb3/index.html) is great.  But sometimes all you want is the database abstraction part of it,
 not the entire application framework.  The use case that modivated me to write this little module is the following; I have a full
 blown web application server written in Loopback with a database, but I also have small satellite application "services" that I
