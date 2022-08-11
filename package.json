@@ -23,6 +23,6 @@
     "loopback-datasource-juggler": "^4.4.0"
   },
   "devDependencies": {
-    "loopback-connector-postgresql": "^3.7.0"
+    "loopback-connector-postgresql": "^5.5.1"
   }
 }
